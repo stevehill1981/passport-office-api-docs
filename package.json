@@ -1,0 +1,45 @@
+{
+  "name": "passport-office-api-docs",
+  "version": "1.0.0",
+  "description": "Passport Office API Documentation - Mobile Access Control & Identity Management",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3003",
+    "build": "next build",
+    "start": "next start -p 3003",
+    "export": "next export",
+    "lint": "next lint",
+    "sync": "./scripts/sync-openapi.sh"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "gray-matter": "^4.0.3",
+    "remark": "^15.0.1",
+    "remark-html": "^16.0.1",
+    "@tailwindcss/typography": "^0.5.10",
+    "tailwindcss": "^3.3.0",
+    "swagger-ui-react": "^5.10.0",
+    "js-yaml": "^4.1.0",
+    "prismjs": "^1.29.0",
+    "react-markdown": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.2.0",
+    "eslint": "^8.50.0",
+    "eslint-config-next": "^14.0.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/netnodes/passport-office-api-docs.git"
+  },
+  "keywords": ["passport-office", "api", "documentation", "mobile-access", "identity-management"],
+  "author": "DoorFlow Team",
+  "license": "MIT"
+}

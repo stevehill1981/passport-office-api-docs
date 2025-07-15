@@ -1,0 +1,41 @@
+name: Sync OpenAPI Specification
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout passport-office-api-docs
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout passport-office repository
+        uses: actions/checkout@v4
+        with:
+          repository: netnodes/passport-office
+          path: passport-office
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Copy OpenAPI spec
+        run: |
+          mkdir -p public
+          cp passport-office/openapi.yaml public/openapi.yaml
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git diff --exit-code public/openapi.yaml || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push changes
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add public/openapi.yaml
+          git commit -m "Sync OpenAPI specification from passport-office repository"
+          git push
