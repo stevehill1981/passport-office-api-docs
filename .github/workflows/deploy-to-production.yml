@@ -1,0 +1,52 @@
+name: Deploy to Production
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  deploy_to_kubernetes:
+    name: Deploy to Kubernetes (Production)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Log in to DigitalOcean Container Registry with short-lived credentials
+        run: doctl registry login --expiry-seconds 1200
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push container image
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: registry.digitalocean.com/netnodes/passport-office-api-docs:${{ github.event.release.tag_name }}
+
+      - name: Update deployment files
+        run: |
+          TAG=${{ github.event.release.tag_name }} && sed -i 's|<IMAGE>|registry.digitalocean.com/netnodes/passport-office-api-docs:'${TAG}'|' $GITHUB_WORKSPACE/config/k8s/production/deployment.yml
+
+      - name: Save DigitalOcean kubeconfig with short-lived credentials
+        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 production-k8s
+
+      - name: Create namespace if it doesn't exist
+        run: kubectl get namespace | grep -q "^passport-office-api-docs " || kubectl create namespace passport-office-api-docs
+
+      - name: Deploy application
+        run: |
+          kubectl apply -f $GITHUB_WORKSPACE/config/k8s/production/deployment.yml \
+                        -f $GITHUB_WORKSPACE/config/k8s/production/hpa.yml \
+                        -f $GITHUB_WORKSPACE/config/k8s/production/ingress.yml \
+                        -f $GITHUB_WORKSPACE/config/k8s/production/service.yml
+
+      - name: Verify deployment
+        run: |
+          kubectl rollout status -n passport-office-api-docs deployment/passport-office-api-docs

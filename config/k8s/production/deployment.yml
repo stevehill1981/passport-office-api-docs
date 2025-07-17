@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: passport-office-api-docs
+  namespace: passport-office-api-docs
+  labels:
+    app: passport-office-api-docs
+    tier: web
+    environment: production
+spec:
+  selector:
+    matchLabels:
+      app: passport-office-api-docs
+      tier: web
+      environment: production
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: passport-office-api-docs
+        tier: web
+        environment: production
+    spec:
+      containers:
+        - name: passport-office-api-docs
+          image: <IMAGE>
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              httpHeaders:
+                - name: Host
+                  value: passport-office-api-docs.doorflow.com
+              path: /index.html
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi

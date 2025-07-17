@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: passport-office-api-docs
+  namespace: passport-office-api-docs
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: passport-office-api-docs
